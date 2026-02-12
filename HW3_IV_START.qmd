@@ -25,7 +25,7 @@ Keep your work readable: Use clear headings and label plot elements thoughtfully
 
 Submit both your rendered output and the Quarto (`.qmd`) file.
 
-**Assignment submission (YOUR NAME)**: ______________________________________
+**Assignment submission (YOUR NAME)**: Zach Loo
 
 
 ------------------------------------------------------------------------
@@ -65,7 +65,8 @@ library(AER)      # for ivreg (2SLS estimation)
 
 ```{r}
 
-matched_data <- 
+matched_data <- read_csv(here::here("data", "matched_data_subset.csv")) |> 
+  mutate(precinct_id = factor(precinct_id))
 
 ```
 
@@ -92,10 +93,10 @@ b. Include the control variables used in Stokes (2015) for both stages: Distance
 c. After running the first stage, report the F-statistic for the instrument.
 
 ```{r}
-first_stage <- lm()
+first_stage <- lm(proposed_turbine_3km ~ log_wind_power, data = matched_data)
 
 export_summs(first_stage, digits = 3,
-             model.names = c("First stage: Prpoposed Turbine 3km"),
+             model.names = c("First stage: Proposed Turbine 3km"),
              coefs = c("(Intercept)", "log_wind_power")) 
 
 ```
@@ -105,7 +106,7 @@ export_summs(first_stage, digits = 3,
 Check instrument strength (F-statistic)
 ```{r}
 
-
+summary(first_stage)
 ```
 
 **Question 2A:** Based on the instrument relevance test reported in the study, would you conclude the instrument is strong enough to be credible? Explain what a weak instrument would mean in this setting: Specifically, what would it suggest about compliance with Ontario’s Green Energy Act policy? 
