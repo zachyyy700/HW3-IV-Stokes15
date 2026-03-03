@@ -92,7 +92,7 @@ b. Include the control variables used in Stokes (2015) for both stages: Distance
 c. After running the first stage, report the F-statistic for the instrument.
 
 ```{r}
-first_stage <- lm(proposed_turbine_3km ~ log_wind_power + mindistlake + latitude + longitude + lat_sq + long_sq + latitude*longitude + factor(district_id), data = matched_data)
+first_stage <- lm(proposed_turbine_3km ~ log_wind_power + mindistlake + mindistlake_sq + longitude + long_sq + latitude + lat_sq + factor(district_id), data = matched_data)
 
 export_summs(first_stage, digits = 3,
              model.names = c("First stage: Proposed Turbine 3km"),
@@ -110,7 +110,7 @@ first_stage_summary$fstatistic[1]
 
 **Question 2A:** Based on the instrument relevance test reported in the study, would you conclude the instrument is strong enough to be credible? Explain what a weak instrument would mean in this setting: Specifically, what would it suggest about compliance with Ontario’s Green Energy Act policy? 
 
-*Response:* The f-statistic of the instrument is reported to be 15.16, which is considered to be a strong instrument. A weak instrument would indicate that wind speed doesn't reliably predict where turbines are proposed. This suggests that wind developers are not proposing turbines based on wind resources but on other factors like political reception or local economic conditions.
+*Response:* The f-statistic of the instrument is reported to be 68 in the study, which is considered to be a strong instrument. A weak instrument would indicate that wind speed doesn't reliably predict where turbines are proposed. This suggests that wind developers are not proposing turbines based on wind resources but on other factors like political reception or local economic conditions.
 
 ------------------------------------------------------------------------
 
@@ -138,7 +138,7 @@ matched_data$proposed_turbine_3km_HAT <- predict(first_stage)
 $$LiberalVoteShare_i = \beta_0 + \beta_1 \widehat{ProposedTurbine}_i + ControlVariables... +  \epsilon_i$$
 
 ```{r}
-second_stage <- lm(change_liberal ~ proposed_turbine_3km_HAT + mindistlake + latitude + longitude + lat_sq + long_sq + latitude*longitude + factor(district_id), data = matched_data)
+second_stage <- lm(change_liberal ~ proposed_turbine_3km_HAT + mindistlake + mindistlake_sq + longitude + long_sq + latitude + lat_sq + factor(district_id), data = matched_data)
 
 export_summs(second_stage, digits = 3, 
              model.names = c("Second stage: Change in Liberal Vote Share"),
@@ -149,11 +149,11 @@ export_summs(second_stage, digits = 3,
 
 **Question 2B:** Imagine you are explaining your 2SLS findings to a policymaker in Ontario. What does the estimated coefficient on `proposed_turbine_3km_HAT` imply about the electoral impact of a local wind turbine proposal (within 3 km) on liberal vote share?
 
-*Response:* A wind turbine proposal causes a 10% drop in Liberal vote share. This supports the hypothesis that a backlash does exist on the political party that implemented the Green Energy Act.
+*Response:* A wind turbine proposal causes a 6% drop in Liberal vote share compared to districts with no turbine proposal. This supports the hypothesis that a backlash does exist on the political party that implemented the Green Energy Act.
 
 **Question 2C:** Explain what it means that IV identifies a LATE in the context of the wind-turbine voting study. What specific subset of observations does the second-stage 2SLS estimate apply to, and what does it imply about interpretation and generalizability? 
 
-*Response:* IV estimates the causal effect only for districts where turbine proposals were actually influenced by wind availability. In other words, the -0.102 effect only applies to districts that had turbine proposals determined by wind speed.
+*Response:* IV estimates the causal effect only for districts where turbine proposals were actually influenced by wind availability. In other words, the -0.064 effect only applies to districts that had turbine proposals determined by wind speed.
 
 ------------------------------------------------------------------------
 
@@ -185,7 +185,9 @@ Syntax for specifying 2SLS using `ivreg()`:
 
 ```{r}
   
-fit_2sls <- ivreg(change_liberal ~ proposed_turbine_3km + mindistlake + latitude + longitude + lat_sq + long_sq + latitude*longitude + factor(district_id) | log_wind_power + mindistlake + latitude + longitude + lat_sq + long_sq + latitude*longitude + factor(district_id), data = matched_data)
+fit_2sls <- ivreg(change_liberal ~ proposed_turbine_3km + mindistlake + mindistlake_sq + longitude + long_sq + latitude + lat_sq + long_lat + as.factor(district_id) | 
+log_wind_power + mindistlake + mindistlake_sq + longitude + long_sq + latitude + lat_sq + long_lat + as.factor(district_id), 
+data = matched_data)
 
 export_summs(fit_2sls, digits = 3,
              model.names = c("Change in Liberal Vote Share"),
